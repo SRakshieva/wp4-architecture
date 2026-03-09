@@ -39,7 +39,8 @@ flowchart TB
     class issuer,holder,verifier primaryRole;
     class trust component;
 ```
-In the WE BUILD project, the focus is primarily on wallets for legal entities. 
+
+In the WE BUILD project, the focus is primarily on wallets for economic operators. 
 In these scenarios, qualified electronic registered delivery services (QERDS) support trusted messaging between participants. 
 Accordingly, interactions between issuers, holders and verifiers may be routed through a Qualified Trust Service Provider (QTSP) operating a QERDS. 
 The European Digital Directory provides digital addressing for secure routing of documents and notifications.
