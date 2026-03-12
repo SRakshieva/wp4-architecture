@@ -9,7 +9,7 @@ While this document avoids abbreviations as much as possible, commonly used abbr
 | Term | Abbreviation | Definition |
 | :--- | :--- | :--- |
 | **Architectural Decision Record** | ADR | A document used to capture and justify significant technical choices. ADRs serve as the project’s "logbook" to ensure transparency regarding the rationale behind protocol and standard adoption. |
-| **Architecture and Reference Framework** | ARF | TThe reference architecture for the European Digital Identity Wallet ecosystem published by the European Commission in cooperation with the Member States. It defines roles, trust models, protocols and interoperability requirements for the ecosystem. |
+| **Architecture and Reference Framework** | ARF | The reference architecture for the European Digital Identity Wallet ecosystem published by the European Commission in cooperation with the Member States. It defines roles, trust models, protocols and interoperability requirements for the ecosystem. |
 | **Attestation Rulebook**| - | A document describing the governance, requirements and semantic interpretation of a specific attestation type, including how credential data maps to vocabulary terms and schemas. |
 | **Blueprint** | — | The high-level architecture and integration document (D4.1) describing the WE BUILD ecosystem, architectural patterns, interaction flows and governance model. |
 | **Business Wallet Unit Attestation** | BWUA | A specific type of Wallet Unit Attestation issued for a European Business Wallet (EBW) instance. |
