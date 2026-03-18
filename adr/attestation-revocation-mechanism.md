@@ -32,7 +32,7 @@ The WE BUILD project adopts the [IETF Token Status List](https://datatracker.iet
 
 ### Impact (resulting from ADR High-Level Requirements):
 * **Issuers** (PID/EBWOID Providers, EAA Providers, including QEAA, Pub-EAA) MUST implement attestation revocation for applicable attestations and that are valid for more than 24h. Revocable attestations MUST be assigned a random status list and random index within it before being signed, all in batches.
-* **Issuers** MUST ensure the invalid status for not yet expired and revoked attestations is published within a reasonable amount of time (under 1h?).
+* **Issuers** MUST ensure the invalid status for not yet expired and revoked attestations is published within a reasonable amount of time (for instance, under 1h).
 * **Wallet Providers** SHOULD ensure their Wallet Units regularly check the revocation status of its PIDs/EBWOIDs and other attestations, and notify the User if any is revoked.
 * **Relying Parties** SHOULD check the revocation status via a Revocation Status Service. If reliable information is unavailable, they SHOULD perform a risk analysis rather than a mandatory failure.
 
