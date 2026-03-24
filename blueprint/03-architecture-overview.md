@@ -1,230 +1,106 @@
 # Architecture Overview
 
+## Architectural Principles
+While the previous chapter describes the regulatory and architectural frameworks that WE BUILD aligns with, this chapter introduces the architectural principles guiding the design of the WE BUILD ecosystem.
+
+- **Interoperability:** Wallet providers, issuers and verifiers interact across organisational and national boundaries.
+- **Reusability:** The architecture builds on existing EU digital infrastructure and results from previous Large Scale Pilots.
+- **Security by design:** Security controls are integrated into the architecture from the start.
+- **Privacy by design:** Users retain control over personal and organisational data through selective disclosure and explicit consent.
+
 ## The Ecosystem at a Glance
-The EU digital identity and EU business wallet ecosystem is an instance of the 3 party model for attestations. In this model there are 4 main actors:
-1. The holder, aka the identity wallet that is controlled by either a natural or legal person
-2. The issuer that relies on authentic sources of information to issue attestations to the holder/wallet
-3. The verifier receives an attestation based on information present in the wallet.
-4. The trust framework that in the EU ecosystems is based on ETSI TS 119604/119612 aka trust status lists populated by trust status providers that for some use cases are QTSPs
-
-The EU ecosystem for the natural person wallet is described in more detail in [ARF]. The corresponding document for the EU legal person wallet is in progress.
-
-Several sources exist for describing the more general 3rd party model, including ongoing work in the IETF eg [https://datatracker.ietf.org/doc/draft-ietf-spice-vdcarch/]
+The EUDI Wallet and EBW ecosystem follows the common three-party attestation model. In this model, three primary actors interact: issuer, holder and verifier. A trust framework supports these actors by providing the trust anchors used for validation.
+1. **Holder** – the wallet controlled by a natural or legal person.
+2. **Issuer** – an entity that issues attestations to the Holder.
+3. **Verifier** – a relying party that receives and validates attestations presented by the Holder.
+4. **Trust framework** – the infrastructure used to validate trust relationships between ecosystem participants (described in Chapter 6).
 
 ## System Landscape
-
-The diagram below illustrates the baseline trust topology of the EU wallet ecosystem. Issuers provide attestations to holders, holders present them to verifiers, and all parties anchor trust decisions against the EU trusted lists defined under ETSI TS 119 612 and ETSI TS 119 604 within the framework of the eIDAS Regulation.
-
-```mermaid
-graph LR;
-  issuer-->holder;
-  holder-->verifier;
-  issuer-->trust;
-  verifier-->trust;
-  holder-->trust;
-```
-
-In the WE BUILD project the focus is primarily on wallets for legal entities. In this case the regulation includes the use of qualified electronic registered delivery services to enable messaging services between entities in the ecosystem. Accordingly, the generic trust anchor is replaced by a Qualified Trust Service Provider operating a Qualified Electronic Registered Delivery Service (QTSP/QERDS), through which issuers, holders, and verifiers route their trust and messaging interactions. The diagram changes to this:
+The diagram below illustrates the baseline trust topology of the EU wallet ecosystem. Issuers provide attestations to holders, holders present them to verifiers, and all actors validate trust relationships using the trusted lists.
 
 ```mermaid
-graph LR;
-  issuer-->holder;
-  holder-->verifier;
-  issuer-->QTSP/QERDS;
-  verifier-->QTSP/QERDS;
-  holder-->QTSP/QERDS;
+%% Baseline trust topology of the EU wallet ecosystem
+flowchart TB
+    issuer["Issuer&nbsp;&nbsp;"]
+    holder["Holder&nbsp;&nbsp;"]
+    verifier["Verifier&nbsp;&nbsp;"]
+    trust["WE BUILD Trusted Lists"]
+
+    issuer -->|"issues attestations<br/>(PID, EAA, QEAA)"| holder
+    holder -->|"presents attestations<br/>(selective disclosure)"| verifier
+    issuer -.->|"published in"| trust
+    holder -.->|"validates issuer &<br/>verifier against"| trust
+    verifier -.->|"validates<br/>credentials against"| trust
+
+    %% Styling
+    classDef primaryRole fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000;
+    classDef component fill:#e1d5e7,stroke:#9673a6,stroke-width:2px,color:#000;
+
+    class issuer,holder,verifier primaryRole;
+    class trust component;
 ```
 
-## Common Rules for Everyone
-Security, error handling, auditability, portability.
+WE BUILD focuses primarily on wallets for economic operators. 
+In these scenarios, qualified electronic registered delivery services (QERDS) support trusted messaging between participants. 
+Accordingly, interactions between issuers, holders and verifiers may be routed through a Qualified Trust Service Provider (QTSP) operating a QERDS. 
+The European Digital Directory provides digital addressing for secure routing of documents and notifications.
 
-## Wallet Implementation Models 
-To be authored by Wallet Group. Describes the techn stacks, such as cloud-based vs. device-based solutions, and the differences between EUDIW for Natural Person and European Business Wallets for  economic operators.
-
-### The EUDI Wallet for Natural Person
-
-The diagram below provides a concept-level view of the EUDI Wallet ecosystem for natural persons (informative, non-normative).
+In WE BUILD, the ecosystem typically includes the following additional components:
 
 ```mermaid
-%% EUDI Wallet concept model for natural persons
-  flowchart TB
-      %% --- Roles ---
-      subgraph roles ["Roles"]
-          direction LR
-          H["Holder&nbsp;&nbsp;"]
-          RP["Relying Party&nbsp;&nbsp;"]
-          I["Issuer&nbsp;&nbsp;"]
-          R["Role&nbsp;&nbsp;"]
-      end
+%% WE BUILD trust topology with QTSP/QERDS and European Digital Directory
+flowchart TB
+    issuer["Issuer&nbsp;&nbsp;"]
+    holder["Holder&nbsp;&nbsp;"]
+    verifier["Verifier&nbsp;&nbsp;"]
+    qtsp["QTSP / QERDS&nbsp;&nbsp;"]
+    directory["European Digital<br/>Directory"]
 
-      %% --- Users & Identity ---
-      subgraph identity ["Users & Identity"]
-          direction LR
-          U["User&nbsp;&nbsp;"]
-          NP["Natural Person&nbsp;&nbsp;"]
-          LP["Legal Person&nbsp;&nbsp;"]
-          PP["PID Provider&nbsp;&nbsp;"]
-          PID["PID&nbsp;&nbsp;"]
-      end
+    issuer -->|"issues EBWOID &<br/>attestations"| holder
+    holder -->|"presents attestations<br/>(selective disclosure)"| verifier
+    issuer -.->|"signing/sealing certificates &<br/>revocation via QERDS"| qtsp
+    holder -.->|"transmits/receives documents &<br/>signs/seals"| qtsp
+    verifier -.->|"sends/receives<br/>notifications via QERDS"| qtsp
+    qtsp -->|"routes via<br/>digital addresses"| directory
+    holder -.->|"registers<br/>digital address"| directory
 
-      %% --- Wallet Solution ---
-      subgraph solution ["Wallet Solution"]
-          direction LR
-          WP["Wallet Provider&nbsp;&nbsp;"]
-          WS["Wallet Solution&nbsp;&nbsp;"]
-          WCC["Wallet Core Component(s)&nbsp;&nbsp;"]
-          WA["Wallet Application&nbsp;&nbsp;"]
-      end
+    %% Styling
+    classDef primaryRole fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000;
+    classDef component fill:#e1d5e7,stroke:#9673a6,stroke-width:2px,color:#000;
+    classDef governance fill:#f8cecc,stroke:#b85450,stroke-width:2px,color:#000;
 
-      %% --- Wallet Runtime ---
-      subgraph runtime ["Wallet Runtime"]
-          direction LR
-          WIC["Wallet Instance&nbsp;&nbsp;"]
-          WIT["Wallet Instance (External)&nbsp;&nbsp;"]
-          WIA["WIA / WUA&nbsp;&nbsp;"]
-      end
-
-      %% Type relationships (solid)
-      H -->|is type of| R
-      RP -->|is type of| R
-      I -->|is type of| R
-      I -->|is type of| PP
-
-      %% User relationships (solid)
-      R -->|has| U
-      U -->|is a| NP
-      U -->|is a| LP
-      U -->|controls| WIC
-
-      %% Issuance (solid, thick)
-      PP ==>|issues| PID
-      WP ==>|issues| WIA
-      WP -->|provides| WS
-
-      %% Authentication & validation (dashed)
-      U -.->|authenticated by| PID
-      WIC -.->|defines type and validates| PID
-      WIA -.->|validates| WIC
-
-      %% Wallet structure (solid)
-      WIC -->|instance of| WS
-      WS -->|consists of| WCC
-      WS -->|consists of| WA
-      WCC -->|integrates with| WA
-
-      %% Cross-wallet communication (dotted)
-      WIT -->|communicates with| WIC
-
-      %% Styling
-      classDef primaryRole fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000;
-      classDef component fill:#e1d5e7,stroke:#9673a6,stroke-width:2px,color:#000;
-      classDef walletPart fill:#f8cecc,stroke:#b85450,stroke-width:2px,color:#000;
-
-      class H,RP,I,NP,LP primaryRole;
-      class R,U,PP,PID component;
-      class WP,WS,WCC,WA,WIC,WIT,WIA walletPart;
-
-      %% Subgraph styling
-      style roles fill:none,stroke:#d6b656,stroke-width:1px,stroke-dasharray: 5 5
-      style identity fill:none,stroke:#9673a6,stroke-width:1px,stroke-dasharray: 5 5
-      style solution fill:none,stroke:#b85450,stroke-width:1px,stroke-dasharray: 5 5
-      style runtime fill:none,stroke:#b85450,stroke-width:1px,stroke-dasharray: 5 5
+    class issuer,holder,verifier primaryRole;
+    class qtsp component;
+    class directory governance;
 ```
-_Concept diagram for discussion and alignment. Terminology and role labels should be interpreted in line with the EUDIW ARF and the corresponding WE BUILD architecture artefacts._
 
-### The Business Wallet for Economic Operators and Public Sector Bodies
-The Business Wallet is described in further detail in [Appendix D](https://github.com/webuild-consortium/wp4-architecture/blob/main/blueprint/appendix-ebw-definition.md)
+## Wallet Types in WE BUILD 
 
-The diagram below provides a concept-level view of the European Business Wallet ecosystem for economic operators (informative, non-normative).
+WE BUILD supports wallet solutions for both natural persons and economic operators.
+
+Natural persons interact through EUDI Wallets, which enable individuals to authenticate and present personal identity attributes. Economic operators interact through EBW, which enable organisations to manage and present business-related attestations such as representation rights or organisational attributes.
+
+From a deployment perspective, wallet solutions can be implemented in several ways depending on the target users, operational requirements, and cryptographic architecture. In practice, three main implementation approaches are relevant within the WE BUILD ecosystem.
+
+| Wallet type | Typical context | Characteristics |
+|---|---|---|
+| **Mobile wallets (on-device)** | Natural persons | Wallet application running on a user’s smartphone, with credentials stored and used locally on the device. |
+| **Server or Web-based wallets** | Economic operators | Wallet services operated in backend infrastructure and accessed through Web interfaces or enterprise systems. |
+| **Hybrid wallets** | Both contexts | Combine device-based interaction with backend cryptographic infrastructure. |
+
+The underlying cryptographic architecture of wallets is defined in the ARF and related standards. This Blueprint therefore focuses on the interactions and interoperability patterns relevant for WE BUILD rather than repeating the detailed wallet architecture definitions.
+
+In practice, most deployments follow a mobile-first approach for natural persons and a server-based or enterprise-integrated approach for economic operators. Hybrid architectures may also be used to combine device-based user interaction with backend cryptographic services.
+
 
 ```mermaid
-%% European Business Wallet concept model for economic operators
-  flowchart TB
-      %% --- Roles ---
-      subgraph roles ["Roles"]
-          direction LR
-          H["Holder&nbsp;&nbsp;"]
-          RP["Relying Party&nbsp;&nbsp;"]
-          I["Issuer&nbsp;&nbsp;"]
-          R["Role&nbsp;&nbsp;"]
-      end
-
-      %% --- Ownership & Identity ---
-      subgraph identity ["Ownership & Identity"]
-          direction LR
-          O["Owner&nbsp;&nbsp;"]
-          EO["Economic Operator&nbsp;&nbsp;"]
-          U["User&nbsp;&nbsp;"]
-          NP["Natural Person&nbsp;&nbsp;"]
-          EP["EBWOID Provider&nbsp;&nbsp;"]
-          EID["EBWOID&nbsp;&nbsp;"]
-      end
-
-      %% --- Wallet Solution ---
-      subgraph solution ["EBW Solution"]
-          direction LR
-          EBP["EBW Provider&nbsp;&nbsp;"]
-          EBW["EBW&nbsp;&nbsp;"]
-          WCC["Wallet Core Component&nbsp;&nbsp;"]
-          WA["Wallet Application&nbsp;&nbsp;"]
-      end
-
-      %% --- Wallet Runtime ---
-      subgraph runtime ["Wallet Runtime"]
-          direction LR
-          EBI["EBW Instance&nbsp;&nbsp;"]
-          EUDI["EUDIW Instance&nbsp;&nbsp;"]
-          BW["BWUA&nbsp;&nbsp;"]
-      end
-
-      %% Type relationships (solid)
-      H -->|is type of| R
-      RP -->|is type of| R
-      I -->|is type of| R
-      I -->|is type of| EP
-
-      %% Ownership relationships (solid)
-      R -->|has| O
-      O -->|is an| EO
-      U -->|is a| NP
-      O -->|controls| EBI
-
-      %% Issuance (solid, thick)
-      EP ==>|issues| EID
-      EBP ==>|issues| BW
-      EBP -->|provides| EBW
-
-      %% Authentication & validation (dashed)
-      O -.->|authenticated by| EID
-      O -.->|is subject in| EID
-      EBI -.->|validates| EID
-      BW -.->|validates| EBI
-      WCC -.->|validates| EBI
-
-      %% Wallet structure (solid)
-      EBI -->|instance of| EBW
-      EBW -->|consists of| WCC
-      EBW -->|consists of| WA
-      WCC -->|integrates with| WA
-
-      %% User & cross-wallet interaction (solid)
-      U -->|accesses| WA
-      EBI -->|communicates with| WA
-      EUDI -->|communicates with| EBI
-
-      %% Styling
-      classDef primaryRole fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000;
-      classDef component fill:#e1d5e7,stroke:#9673a6,stroke-width:2px,color:#000;
-      classDef walletPart fill:#f8cecc,stroke:#b85450,stroke-width:2px,color:#000;
-
-      class H,RP,I,EO,NP primaryRole;
-      class R,O,EP,EID,U component;
-      class EBP,EBW,WCC,WA,EBI,EUDI,BW walletPart;
-
-      %% Subgraph styling
-      style roles fill:none,stroke:#d6b656,stroke-width:1px,stroke-dasharray: 5 5
-      style identity fill:none,stroke:#9673a6,stroke-width:1px,stroke-dasharray: 5 5
-      style solution fill:none,stroke:#b85450,stroke-width:1px,stroke-dasharray: 5 5
-      style runtime fill:none,stroke:#b85450,stroke-width:1px,stroke-dasharray: 5 5
+flowchart TB
+    LE["Economic operator /<br>public sector body"] -.-> |controls| EBW
+    NP["Natural person"] -.-> |represents| LE
+    NP -.-> |controls| EUDI
+    EUDI["EUDI Wallet&nbsp;&nbsp;"]-.-> |presents PID to| EBW
+    EP["EBWOID provider"] -.-> |issues EBWOID to| EBW
+    LE -.-> |"registered with<br>(in case of a company)"| BReg
+    LE -.-> |registered with| EP
+    BReg["Business registry"] -.-> |issues EU Company Certificate to| EBW
 ```
-_Concept diagram for discussion and alignment. It illustrates a WE BUILD-style business wallet landscape_
